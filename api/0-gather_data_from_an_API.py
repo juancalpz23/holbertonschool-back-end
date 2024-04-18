@@ -1,63 +1,33 @@
 #!/usr/bin/python3
 """
-REST API
+ 0-gather_data_from_an_API
+ Given employee ID, returns information
+ about his/her todo list progress.
+
 """
-
-import sys
 import requests
+import sys
 
 
-def fetch_employee_todo_list(employee_id):
+def main():
     """
-    Fetches the TODO list of a given employee from the JSONPlaceholder API.
+    According to user_id, show information
     """
-    # Fetch employee data from the API
-    url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
-    response = requests.get(url)
-    employee_data = response.json()
-    employee_name = employee_data['name']
+    user_id = sys.argv[1]
+    user = 'https://jsonplaceholder.typicode.com/users/{}'.format(user_id)
+    todos = 'https://jsonplaceholder.typicode.com/todos/?userId={}'.format(
+        user_id)
+    name = requests.get(user).json().get('name')
+    request_todo = requests.get(todos).json()
+    tasks = [task.get('title')
+             for task in request_todo if task.get('completed') is True]
 
-    # Fetch TODO list of the employee from the API
-    url = f"https://jsonplaceholder.typicode.com/todos?userId={employee_id}"
-    response = requests.get(url)
-    todos = response.json()
-
-    # Count the number of completed tasks
-    completed_tasks = sum(1 for todo in todos if todo['completed'])
-
-    # Get total number of tasks
-    total_tasks = len(todos)
-
-    # Get titles of completed tasks
-    completed_titles = [todo['title'] for todo in todos if todo['completed']]
-
-    return employee_name, completed_tasks, total_tasks, completed_titles
-
-
-def get_employee():
-    """
-    Main function to execute the script.
-    """
-    # Check if the correct number of command-line arguments are provided
-    if len(sys.argv) != 2:
-        print("Usage: python script.py <employee_id>")
-        sys.exit(1)
-
-    # Extract employee ID from command-line arguments
-    try:
-        employee_id = int(sys.argv[1])
-    except ValueError:
-        print("Employee ID must be an integer")
-        sys.exit(1)
-
-    # Fetch employee's TODO list
-    e_name, c_tasks, t_tasks, c_titles = fetch_employee_todo_list(employee_id)
-
-    # Display TODO list progress
-    print(f"Employee {e_name}is done with tasks({c_tasks}/{t_tasks}): ")
-    for title in c_titles:
-        print(f"    {title}")
+    print('Employee {} is done with tasks({}/{}):'.format(name,
+                                                          len(tasks),
+                                                          len(request_todo)))
+    print('\n'.join('\t {}'.format(task) for task in tasks))
 
 
 if __name__ == "__main__":
-    get_employee()
+    if len(sys.argv) == 2:
+        main()
