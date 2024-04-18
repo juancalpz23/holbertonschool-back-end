@@ -1,47 +1,63 @@
 #!/usr/bin/python3
 """
-    Api REST
+ 0-gather_data_from_an_API
+ Given employee ID, returns information
+ about his/her todo list progress.
 """
-
 import requests
-from sys import argv
+import sys
 
 
-def get_employee(id=None):
+def fetch_employee_todo_list(employee_id):
     """
-    using this REST API, for a given employee ID,
-    returns information about his/her TODO list progress.
+    Fetches the TODO list of a given employee from the JSONPlaceholder API.
     """
-    # check if argv[1] is a number int
-    if len(argv) > 1:
-        try:
-            id = int(argv[1])
-        except ValueError:
-            return
+    base_url = "https://jsonplaceholder.typicode.com/"
+    user_url = base_url + f"users/{employee_id}"
+    todos_url = base_url + f"todos/?userId={employee_id}"
 
-    if isinstance(id, int):
-        base = "https://jsonplaceholder.typicode.com"
-        user = requests.get(f"{base}/users/{id}").json()
-        to_dos = requests.get(f"{base}/todos/?userId={id}").json()
+    user_response = requests.get(user_url)
+    todos_response = requests.get(todos_url)
 
-        if user and to_dos:
-            total_tasks = len(to_dos)
-            # fmt: off
-            titles_completed = [task["title"]
-                                for task in to_dos
-                                if task["completed"]]
-            # fmt: on
-            tasks_completed = len(titles_completed)
+    if user_response.status_code != 200 or todos_response.status_code != 200:
+        print("Failed to fetch data from the API.")
+        sys.exit(1)
 
-            print(
-                "Employee {} is done with tasks({}/{}):".format(
-                    user["name"], tasks_completed, total_tasks
-                )
-            )
+    user_data = user_response.json()
+    todos_data = todos_response.json()
 
-            for title in titles_completed:
-                print(f"\t {title}")
+    if not user_data or not todos_data:
+        print("No data found for the given user ID.")
+        sys.exit(1)
+
+    return user_data['name'], todos_data
+
+
+def main():
+    """
+    Main function to execute the script.
+    """
+    if len(sys.argv) != 2:
+        print("Usage: python script.py <employee_id>")
+        sys.exit(1)
+
+    try:
+        employee_id = int(sys.argv[1])
+    except ValueError:
+        print("Employee ID must be an integer.")
+        sys.exit(1)
+
+    employee_name, todos_data = fetch_employee_todo_list(employee_id)
+
+    completed_tasks = [task for task in todos_data if task['completed']]
+    total_tasks = len(todos_data)
+
+    print("Employee {} is done with tasks({}/{})".format
+          (employee_name, len(completed_tasks), total_tasks))
+
+    for task in completed_tasks:
+        print("\t{}".format(task['title']))
 
 
 if __name__ == "__main__":
-    get_employee()
+    main()
