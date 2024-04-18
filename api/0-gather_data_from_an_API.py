@@ -52,8 +52,8 @@ def main():
     completed_tasks = [task for task in todos_data if task['completed']]
     total_tasks = len(todos_data)
 
-    print("Employee {} is done with tasks({}/{})".format
-          (employee_name, len(completed_tasks), total_tasks))
+    print("Employee {} is done with tasks({}/{})"
+          .format(employee_name, len(completed_tasks), total_tasks))
 
     for task in completed_tasks:
         print("\t{}".format(task['title']))
