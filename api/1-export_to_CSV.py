@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-""" 1-export_to_CSV
-
-    Export data in the CSV format.
+"""
+1-export_to_CSV
+Export data in the CSV format.
 """
 import csv
 import requests
@@ -9,7 +9,8 @@ import sys
 
 
 def main():
-    """According to user_id, export information in CSV
+    """
+    According to user_id, export information in CSV
     """
     user_id = sys.argv[1]
     user = 'https://jsonplaceholder.typicode.com/users/{}'.format(user_id)
